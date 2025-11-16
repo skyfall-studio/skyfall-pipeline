@@ -1,5 +1,5 @@
 
-# 📘 SKYFALL PIPELINE SPECIFICATION — **v3.0 (2025-11-16)**
+# 📘 SKYFALL PIPELINE SPECIFICATION — **v3.0 (2025-11-16)**  
 **Issued by:** SKYFALL Pipeline Department  
 **Audience:** Pipeline TDs, Engineering, Supervisors, IT/Infra Teams  
 **Scope:** Unified VFX pipeline architecture for SKYFALL Korea · Vietnam · India · Singapore IDC  
@@ -12,10 +12,10 @@
 2. Global Architecture  
 3. Runtime Pipeline Structure (Local /opt/pipeline)  
 4. Developer Workspace Structure (Local ~/skyfall-dev)  
-5. NAS Project Data Structure (/Volumes/skyfall)  
+5. NAS Project Data Structure (FULL v3.0)  
 6. Pipeline Deployment Model  
 7. Repository Structure & Git Workflow  
-8. Nuke Integration (High-Level)  
+8. Nuke Integration  
 9. Background Services  
 10. Security & Access Control  
 11. Environment Variables  
@@ -31,32 +31,32 @@ SKYFALL Pipeline v3.0 integrates:
 - Developer workspace: **~/skyfall-dev/**
 - NAS-based project storage: **/Volumes/skyfall/**
 - GitHub Organization: **skyfall-studio**
-- Kitsu API workflow (setup, ingest, publish)
-- Multi-site scalability (KR ↔ VN ↔ IN ↔ SG)
+- Kitsu automation (setup → ingest → publish)
+- Multi-site workflow (KR ↔ VN ↔ IN ↔ SG IDC)
 
-**Core Philosophy**
-- Code = local  
-- Data = NAS  
-- Updates = Git  
-- Shows = structure-first  
-- Nuke = fully integrated  
-- Multi-site = latency-safe architecture  
+Core Principles:
+
+- Code executes locally → fastest  
+- Data stored on NAS → safest  
+- Updates flow through GitHub → clean & controlled  
+- Shows follow strict standardized structure  
+- Nuke integrates automatically  
 
 ---
 
 # 2. Global Architecture
 
 ```
-          Developer (~/skyfall-dev)
-                   ↓ push
-        GitHub (skyfall-studio/skyfall-pipeline)
-                   ↓ pull
+Developer Machine (~/skyfall-dev)
+             ↓ push
+GitHub (skyfall-studio/skyfall-pipeline)
+             ↓ pull
 ──────────────────────────────────────────
-   Runtime Pipeline on Every Client Machine
-                /opt/pipeline
+Runtime Pipeline on Artist/Supervisor PCs
+             /opt/pipeline
 ──────────────────────────────────────────
-              NAS Project Storage
-         /Volumes/skyfall/shows/
+NAS Project Storage
+         /Volumes/skyfall/
 ──────────────────────────────────────────
 ```
 
@@ -120,37 +120,112 @@ SKYFALL Pipeline v3.0 integrates:
 ```
 ~/skyfall-dev/
 │
-├── pipeline/
+├── pipeline/              ← main development repo
 ├── ingest-tests/
 ├── nuke-tests/
 ├── docs/
 └── sandbox/
 ```
 
+Develop here → push → deploy to all artists via /opt/pipeline.
+
 ---
 
-# 5. NAS Project Data Structure – /Volumes/skyfall
+# 5. NAS Project Data Structure — **FULL Expanded v3.0**
+
+The following structure merges **v2.5 + v3.0** into the final, unified NAS layout.
 
 ```
 /Volumes/skyfall/
 │
-├── shows/
-│   └── <SHOW_NAME>/
-│       ├── project.yml
-│       ├── assets/
+├── shows/                                      ← All shows (Film / Series)
+│   └── <SHOW_NAME>/                             ← ABC, HERO, MOV01, etc.
+│       │
+│       ├── project.yml                          ← Show-level metadata
+│       │
+│       ├── assets/                              ← Show shared assets
+│       │   ├── char/
+│       │   ├── env/
+│       │   ├── prop/
+│       │   ├── tex/
+│       │   └── lookdev/
+│       │
 │       ├── plates/
+│       │   ├── EP01/S001/0010/
+│       │   │   ├── camera/                      ← RAW: R3D, ARRIRAW, BRAW
+│       │   │   ├── hdr/                         ← HDRI
+│       │   │   ├── lidar/                       ← Lidar / photogrammetry
+│       │   │   └── metadata/                    ← Slate, lens, LUT, reports
+│       │   └── ingest_log/                      ← ingest report JSON/CSV
+│       │
 │       ├── editorial/
+│       │   ├── offline/
+│       │   ├── conform/
+│       │   ├── timeline/
+│       │   └── reference/
+│       │
 │       ├── EP01/
 │       │   └── S001/0010/
+│       │        ├── plate/
+│       │        ├── prep/
+│       │        ├── roto/
+│       │        ├── comp/
+│       │        │   ├── render/
+│       │        │   ├── preview/
+│       │        │   └── nk/
+│       │        ├── elements/
+│       │        ├── cache/
+│       │        ├── notes/
+│       │        └── meta/
+│       │             └── task_log.json
+│       │
 │       ├── dailies/
+│       │   ├── EP01/
+│       │   │   └── 2025-11-16_teamreview.mov
+│       │   └── ...
+│       │
 │       ├── deliveries/
+│       │   ├── EP01/
+│       │   │   ├── <SHOW>_EP01_final_v001/
+│       │   │   │   ├── mov/
+│       │   │   │   ├── exr/
+│       │   │   │   ├── docs/
+│       │   │   │   └── manifest/
+│       │   └── season_master/
+│       │
 │       ├── exchange/
+│       │   ├── inbound/
+│       │   │   ├── YYYYMMDD_batch/
+│       │   │   │   ├── 01_list/
+│       │   │   │   ├── 02_edit/
+│       │   │   │   ├── 03_plate/
+│       │   │   │   └── readme.txt
+│       │   ├── outbound/
+│       │   │   ├── YYYYMMDD_delivery/
+│       │   │   │   ├── 01_mov/
+│       │   │   │   ├── 02_assets/
+│       │   │   │   ├── 03_docs/
+│       │   │   │   └── hashlist.md5
+│       │   ├── archive/
+│       │   └── nda/
+│       │
 │       ├── config/
+│       │   ├── ocio/
+│       │   ├── luts/
+│       │   ├── env/
+│       │   │   ├── nuke_template.nk
+│       │   │   └── skyfall_publish_panel.gizmo
+│       │   ├── pipeline_settings.json
+│       │   ├── version_manifest.yml
+│       │   └── backup_policy.yml
+│       │
 │       └── logs/
 │
-├── assets/
-├── config/
-└── opt/
+├── assets/                                      ← Studio-level assets
+│
+├── config/                                      ← Global config
+│
+└── opt/                                         ← Per-show config (data only)
 ```
 
 ---
@@ -158,11 +233,11 @@ SKYFALL Pipeline v3.0 integrates:
 # 6. Pipeline Deployment Model (v3.0)
 
 ```
-~/skyfall-dev/pipeline
-     ↓ push
-GitHub (skyfall-studio/skyfall-pipeline)
-     ↓ pull
-/opt/pipeline (runtime engine)
+~/skyfall-dev/pipeline      ← 개발
+        ↓ push
+GitHub (skyfall-studio)
+        ↓ pull
+/opt/pipeline               ← Runtime for all artists
 ```
 
 ---
@@ -173,14 +248,12 @@ GitHub (skyfall-studio/skyfall-pipeline)
 main        ← stable  
 dev         ← development  
 feature/*   ← feature branches  
-hotfix/*    ← emergency fixes  
+hotfix/*    ← urgent fixes  
 ```
 
 ---
 
-# 8. Nuke Integration
-
-Loads automatically:
+# 8. Nuke Integration (Auto-Load)
 
 ```
 /opt/pipeline/apps/nuke/menu.py
@@ -199,8 +272,10 @@ Loads automatically:
 
 # 10. Security & Access Control
 
-- Code: /opt/pipeline (root-owned)  
-- Data: /Volumes/skyfall (NAS)  
+- /opt/pipeline → root-owned (read-only for artists)  
+- /Volumes/skyfall → NAS-permissions (department separated)  
+- OCIO/LUT stored on NAS  
+- NDA content separated in `/exchange/nda`
 
 ---
 
