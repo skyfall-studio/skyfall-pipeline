@@ -1,0 +1,8 @@
+# /Users/pd/skyfall-dev/pipeline/apps/nuke/gizmos/skyfall_signature_global.nk
+# SKYFALL Global Signature (v1)
+# - 파이프라인 로딩 테스트용 최소 템플릿
+# - 실제 기능은 Python scripts 에서 처리
+
+Root {
+ name SKYFALL_GLOBAL
+}

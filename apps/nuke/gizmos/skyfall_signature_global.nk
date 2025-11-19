@@ -1,0 +1,42 @@
+Group {
+ name SKYFALL_SIGNATURE_GLOBAL
+ label "SKYFALL GLOBAL"
+ tile_color 0x4178ffff
+ selected true
+
+ knobChanged "python:
+import nuke
+import os, sys
+pipe_root = os.getenv('PIPELINE_ROOT','/opt/pipeline')
+if pipe_root not in sys.path:
+    sys.path.append(pipe_root)
+try:
+	print('SKYFALL knobChanged triggered')   # ★ 추가
+    import apps.nuke.scripts.context as ctx
+    ctx.update_knobs(nuke.thisNode())
+except Exception as e:
+    nuke.tprint('SKYFALL GLOBAL ERROR: %s' % e)
+"
+
+ addUserKnob {20 Pipeline l "Pipeline Context"}
+ addUserKnob {4 SHOW}
+ addUserKnob {4 EP}
+ addUserKnob {4 SEQ}
+ addUserKnob {4 SHOT}
+
+ addUserKnob {20 Paths}
+ addUserKnob {4 SHOT_ROOT}
+ addUserKnob {4 NK_PATH}
+
+ addUserKnob {20 Plate}
+ addUserKnob {4 PLATE_PATH}
+ addUserKnob {4 PLATE_FPS}
+ addUserKnob {4 PLATE_COLORSPACE}
+
+ addUserKnob {20 Versioning}
+ addUserKnob {4 CURRENT_VERSION}
+ addUserKnob {4 NEXT_VERSION}
+
+}
+
+end_group

@@ -1,0 +1,78 @@
+Gizmo {
+ name skyfall_publish_panel
+
+# -----------------------------
+# UI 레이아웃
+# -----------------------------
+addUserKnob {20 SKYFALL_PUBLISH l "SKYFALL PUBLISH PANEL"}
+addUserKnob {26 ""}
+
+addUserKnob {1 show l "SHOW" t "auto-filled from SKYFALL context" "" +RO}
+addUserKnob {1 episode l "EP" t "auto-filled" "" +RO}
+addUserKnob {1 sequence l "SEQ" t "auto-filled" "" +RO}
+addUserKnob {1 shot l "SHOT" t "auto-filled" "" +RO}
+
+addUserKnob {26 ""}
+
+addUserKnob {1 version l "Version" t "Auto versioning" "v001"}
+addUserKnob {4 notes l "Notes" t "Publish notes"}
+
+addUserKnob {26 ""}
+
+addUserKnob {22 btn_preview l "Create Preview" -STARTLINE}
+addUserKnob {22 btn_render l "Render Output"}
+
+addUserKnob {26 ""}
+
+addUserKnob {22 btn_publish l "Publish To Kitsu" -STARTLINE}
+
+# -----------------------------
+# knobChanged (Python)
+# -----------------------------
+knobChanged "python:
+import nuke
+import os, sys
+
+pipe_root = os.getenv('PIPELINE_ROOT')
+if pipe_root and pipe_root not in sys.path:
+    sys.path.append(pipe_root)
+
+try:
+    import apps.nuke.scripts.context as ctx
+    ctx.update_knobs(nuke.thisNode())
+except Exception as e:
+    nuke.tprint('[SKYFALL PUBLISH] Context update failed:', e)
+
+
+knob = nuke.thisKnob()
+node = nuke.thisNode()
+
+# -----------------------------
+# 버튼 동작
+# -----------------------------
+try:
+
+    # Preview 생성
+    if knob.name() == 'btn_preview':
+        import apps.nuke.scripts.publish_panel as panel
+        panel.create_preview(node)
+        nuke.message('Preview created!')
+
+    # Render 생성
+    if knob.name() == 'btn_render':
+        import apps.nuke.scripts.publish_panel as panel
+        panel.create_render(node)
+        nuke.message('Render submitted!')
+
+    # Kitsu Publish
+    if knob.name() == 'btn_publish':
+        import apps.nuke.scripts.publish_panel as panel
+        panel.publish_to_kitsu(node)
+        nuke.message('Published to Kitsu!')
+
+except Exception as e:
+    nuke.tprint('[SKYFALL PUBLISH ERROR]', e)
+
+"
+
+}

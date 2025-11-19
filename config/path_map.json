@@ -1,0 +1,8 @@
+{
+  "to_native": {
+    "/Volumes/skyfall": "X:/"
+  },
+  "to_project": {
+    "X:/": "/Volumes/skyfall"
+  }
+}
